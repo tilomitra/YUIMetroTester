@@ -1,0 +1,187 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>YUIMetroTester</title>
+
+    <!-- WinJS references -->
+    <link href="//Microsoft.WinJS.1.0.RC/css/ui-light.css" rel="stylesheet" />
+    <script src="//Microsoft.WinJS.1.0.RC/js/base.js"></script>
+    <script src="//Microsoft.WinJS.1.0.RC/js/ui.js"></script>
+
+    <!-- YUIMetroTester references -->
+    <script src="/js/yui3/build/yui/yui.js"></script>
+    <link href="/css/default.css" rel="stylesheet" />
+    <script src="/js/default.js"></script>
+</head>
+<body class="yui3-skin-sam"> 
+    <h1>YUI3 Unit Tests. Choose a test.</h1>
+    <div id="wrapper">
+        <div id="menu"></div>
+    </div>
+
+
+    <div id="container">
+        <iframe id="test-iframe" src="#" width="800" height="600"></iframe>
+    </div>
+    <script>
+
+        YUI().use('node', 'event', function (Y) {
+            var pckg = Windows.ApplicationModel.Package.current;
+            var installedLocation = pckg.installedLocation;
+            var menu = Y.one('#menu');
+            var isRunnerSetup = false;
+            //This function gets all the assets/ (js) files for the tests and appends those as script files to the DOM
+            var getUnitAssets = function (folder) {
+                var scriptNode = document.createElement('script');
+                folder.getFolderAsync('assets').done(function (assets) {
+
+                    assets.getFilesAsync().done(function (files) {
+                        files.forEach(function (e, i) {
+                            var url = e.path.substring(installedLocation.path.length);
+
+                            if (url.substr(-2) === 'js') {
+                                scriptNode.setAttribute("src", url);
+                                document.body.appendChild(scriptNode);
+                            }
+                        });
+                    });
+
+                },
+                            
+              function (error) {
+                console.log("No assets/ directory found inside :" + folder.path.substring(installedLocation.path.length));
+              });
+            }
+
+            //this function gets all the unit tests html files and appends a link to them in the DOM
+            var getUnitTestFiles = function (folder) {
+                var installedLocationPath = Windows.ApplicationModel.Package.current.installedLocation.path;
+                folder.getFoldersAsync().done(function (folders) {
+
+                    folders.forEach(function (f, i) {
+
+                        //for each folder, get the html file(s) inside tests/unit
+                        f.getFolderAsync('tests').done(function (tests) {
+
+                            tests.getFolderAsync('unit').done(function (unit) {
+
+                                //getUnitAssets(unit);
+
+                                unit.getFilesAsync().done(function (files) {
+
+
+                                    var title = Y.Node.create('<h2>' + f.displayName + '</h2>');
+                                    menu.appendChild(title);
+
+                                    files.forEach(function (e, i) {
+                                        var a = Y.Node.create('<a href="' + e.path.substring(installedLocationPath.length) + '" class="test-link">' + e.displayName + '</a>');
+                                        menu.appendChild(a);
+                                        menu.appendChild('<br/>');
+
+                                    });
+                                });
+
+                                
+                            },
+
+                            function (error) {
+                                console.log("Tests Folder with path: " + tests.path.substring(installedLocationPath.length) + " has no unit/ directory");
+                            });
+
+                        },
+
+                        function (error) {
+                            console.log("Folder with name: " + folder.path.substring(installedLocationPath.length) + " has no tests/ directory");
+                        });
+
+                    });
+
+                    Y.one('#wrapper').appendChild(menu);
+                    window.setTimeout(function () {
+                        Y.fire("menuAdded");
+                    }, 5000);
+
+                });
+
+            }
+
+
+            var setUpRunner = function (runner) {
+
+                runner.subscribe(runner.TEST_SUITE_BEGIN_EVENT, function (o) {
+                    console.log("Test Case beginning");
+                    if (completedTestCases[o.testName]) {
+                        console.log("The test with name: " + o.testName + "has already been tested");
+                    }
+
+
+                });
+
+                runner.subscribe(runner.TEST_SUITE_COMPLETE_EVENT, function (o) {
+
+
+
+                    console.log("Finished running Test Case with name: " + o.results.name);
+                    console.log("Total Tests: " + o.results.total);
+                    console.log("Failed Tests: " + o.results.failed);
+                    console.log("Passed Tests: " + o.results.passed);
+                    console.log("Ignored Tests: " + o.results.ignored);
+
+                    currentScenario++;
+                    if (scenarios[currentScenario]) {
+
+                        WinJS.Navigation.navigate(scenarios[currentScenario].url);
+
+                    }
+                    else {
+                        console.log("Finished Running all Scenarios");
+                    }
+                });
+
+                isRunnerSetup = true;
+
+            }
+
+            //Get all unit tests files by traversing the src/ directory. This code is written in this crappy way because
+            // i couldn't write getFolderAsync(js/yui3/src) for some reason, so I had to traverse one step at a time.
+            installedLocation.getFolderAsync('js').done(function (folder) {
+                var jsFolder = folder;
+                jsFolder.getFolderAsync('yui3').done(function (folder) {
+                    var yuiFolder = folder;
+
+                    yuiFolder.getFolderAsync('src').done(function (folder) {
+                        var srcDir = folder;
+                        console.log(srcDir.path);
+                        getUnitTestFiles(folder);
+                    });
+                });
+
+            });
+
+            //When all the tests are appended to the dom, set up an event listener
+            Y.on('menuAdded', function () {
+                Y.one('#menu').delegate('click', function (e) {
+
+                    //get the global test runner
+                    var intId = window.setInterval(function () {
+                        if (YUI.YUITest || isRunnerSetup) {
+                            window.clearInterval(intId);
+
+                            if (!isRunnerSetup) {
+                                setUpRunner(YUI.YUITest.TestRunner);
+                            }
+                        }
+                    }, 500);
+                    e.preventDefault();
+                    //WinJS.Navigation.navigate(e.target.get('href'));
+                    Y.one("#test-iframe").setAttribute('src', this.get('href'));
+                }, 'a.test-link');
+            });
+
+        
+        });
+    </script>
+
+</body>
+</html>
