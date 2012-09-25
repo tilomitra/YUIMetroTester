@@ -12,7 +12,7 @@ That's normal. Here's what you have to do:
 
 * Clone the repo.
 * Navigate in to the js/ folder.
-* Clone yui3/ from the YUI3 repo in here. (http://github.com/yui/yui3)
+* Clone yui3/ from the YUI3 repo and switch to the `ie10` branch. The `ie10` branch contains important fixes to make YUI work in IE10. 
 * Try building.
 
 
