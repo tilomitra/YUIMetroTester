@@ -2919,7 +2919,6 @@
     <Content Include="js\yui3\src\datatable\tests\unit\datatable-scroll.html" />
     <Content Include="js\yui3\src\datatable\tests\unit\datatable-sort.html" />
     <Content Include="js\yui3\src\datatable\tests\unit\datatable-table.html" />
-    <Content Include="js\yui3\src\datatype\build.json" />
     <Content Include="js\yui3\src\datatype\docs\assets\datatype-dateformat-lang-tests.js" />
     <Content Include="js\yui3\src\datatype\docs\assets\datatype-dateparse-tests.js" />
     <Content Include="js\yui3\src\datatype\docs\assets\datatype-numberformat-tests.js" />
