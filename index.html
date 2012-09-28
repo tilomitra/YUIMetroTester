@@ -45,12 +45,28 @@
 <body>
 
     <h2>WinJS: Modules with Failing Tests</h2>
-    <h4>As of 9/27/2012 (last commit <code>b0378ca27</code>). Click on a module to view all test results.</h4>
+    <h4>As of 9/28/2012 (last commit <code>b441b6ccd</code>). Click on a module to view all test results.</h4>
 
     <h3 id="total-failed"></h3>
-    <div id="failed">
-    
-    </div>
+    <div id="failed-modules"></div>
+    <div id="failed-tests"></div>
+
+
+    <script id="modules-list-template" type="script/x-handlebars">
+        <div class="failed-module">
+            <h3>{{name}}</h3>
+            <pre>{{results}}</pre>
+        </div>
+    </script>
+
+    <script id="failed-tests-list-template" type="script/x-handlebars">
+            {{#testSuites}}
+                <div class="failed-test">
+                    <h3>{{name}}</h3>
+                    <pre>{{results}}</pre>
+                </div>
+            {{/testSuites}}
+    </script>
 
 
     <script src="http://yui.yahooapis.com/3.7.2/build/yui/yui-min.js"></script>
@@ -60,37 +76,85 @@
 
         YUI().use('handlebars', 'node', 'get', 'test', function (Y) {
 
-            var failedNode = Y.one("#failed");
+            var failedNode = Y.one("#failed-modules");
 
-            Y.one(failedNode).delegate('click', function(e) {
-
-                
+            Y.one(failedNode).delegate('click', function(e) {                
                 this.get('parentNode').toggleClass('active');
-
             }, 'h3');
 
             Y.Get.js('results.js', function(err) {
+                var len, 
+                    totalFailed, 
+                    i, 
+                    tap,
+                    failedTests = {},
+
+                    addTestSuiteFailedTest = function (testSuite) {
+                        Y.Object.each(testSuite, function (v1, k1, o1) {
+                            var testCase = v1;
+                            //if the test case had a failed test
+                            if (testCase.failed && testCase.failed > 0) {
+
+                                failedTests[testSuite.name] = [];
+
+                                //loop over all tests in the test case to find the failed test
+                                Y.Object.each(testCase, function (v2, k2, o2) {
+                                    var test = v2;
+
+                                    if (test.result === 'fail' || (test.failed && test.failed > 0)) {
+                                        //If a module has a failing test, find the failing test and add it to the failedTests array for that module.
+                                        failedTests[testSuite.name].push({
+                                            testCase: testCase.name,
+                                            test: test
+                                        });
+                                    }
+                                });
+                            }
+                        }, this);
+                    }
+
+                    // displayFailedTests: function () {
+                    //     var source   = Y.one('#failed-tests-list-template').getHTML(),
+                    //         template = Y.Handlebars.compile(source),
+                    //         html;
+
+                    //     // Render the template to HTML using the specified data.
+                    //     html = template({
+                    //         testSuites: failedTests
+                    //     });
+
+                    //     // Append the rendered template to the page.
+                    //     Y.one('body').append(html);
+
+                    // }
+
+
                 if (err) {
                     console.log(err);
                     return false;
                 }
 
                 else {
-                    var len = RESULTS.length;
-                    var totalFailed = 0;
-                    for (var i = 0; i < len; i++) {
+                    len = RESULTS.length;
+                    totalFailed = 0;
+
+                    //If a module has a failing test, show the module name and log out all the tests in TAP format
+                    for (i = 0; i < len; i++) {
+
+
                         if (RESULTS[i].failed > 0) {
                             totalFailed += RESULTS[i].failed;
                             YUI.YUITest.TestRunner._lastResults = RESULTS[i];
-                            var tap = YUI.YUITest.TestRunner.getResults(YUI.YUITest.TestFormat.TAP);
+                            tap = YUI.YUITest.TestRunner.getResults(YUI.YUITest.TestFormat.TAP);
 
                             failedNode.appendChild('<div class="failed-module"><h3>' + RESULTS[i].name + '</h3><pre>' + tap  + '</pre></div>');
+
+                            addTestSuiteFailedTest(RESULTS[i]);
+                            
                         }
                     }
 
                     Y.one("#total-failed").appendChild(totalFailed + ' total test failures');
-
-
                 }
             });
 
