@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+
+
+    <style>
+
+    body {
+        font-family: sans-serif;
+        color: #121;
+        padding:25px 50px;
+    }
+    pre {
+        display:none;
+    }
+
+    .active pre {
+        display:block;
+        border-left: 3px solid #ddd;
+        padding-left:15px;
+    }
+
+    h3 {
+        font-weight:normal;
+        padding-bottom:5px;
+        border-bottom: 1px solid #ddd;
+        margin-bottom:6px;
+        cursor:pointer;
+    }
+    pre {
+        width:100%;
+        overflow-x: scroll;
+    }
+
+    #total-failed {
+        text-transform: capitalize;
+        color: red;
+        font-weight:bold;
+        font-size:16px;
+        margin-bottom:15px;
+    }
+    </style>
+</head>
+<body>
+
+    <h2>WinJS: Modules with Failing Tests</h2>
+    <h4>As of 9/27/2012 (last commit <code>b0378ca27</code>). Click on a module to view all test results.</h4>
+
+    <h3 id="total-failed"></h3>
+    <div id="failed">
+    
+    </div>
+
+
+    <script src="http://yui.yahooapis.com/3.7.2/build/yui/yui-min.js"></script>
+    <script src="results.js"></script>
+
+    <script>
+
+        YUI().use('handlebars', 'node', 'get', 'test', function (Y) {
+
+            var failedNode = Y.one("#failed");
+
+            Y.one(failedNode).delegate('click', function(e) {
+
+                
+                this.get('parentNode').toggleClass('active');
+
+            }, 'h3');
+
+            Y.Get.js('results.js', function(err) {
+                if (err) {
+                    console.log(err);
+                    return false;
+                }
+
+                else {
+                    var len = RESULTS.length;
+                    var totalFailed = 0;
+                    for (var i = 0; i < len; i++) {
+                        if (RESULTS[i].failed > 0) {
+                            totalFailed += RESULTS[i].failed;
+                            YUI.YUITest.TestRunner._lastResults = RESULTS[i];
+                            var tap = YUI.YUITest.TestRunner.getResults(YUI.YUITest.TestFormat.TAP);
+
+                            failedNode.appendChild('<div class="failed-module"><h3>' + RESULTS[i].name + '</h3><pre>' + tap  + '</pre></div>');
+                        }
+                    }
+
+                    Y.one("#total-failed").appendChild(totalFailed + ' total test failures');
+
+
+                }
+            });
+
+        });
+
+
+    </script>
+</body>
+</html>
