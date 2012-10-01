@@ -1,0 +1,107 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>YUIMetroTester: Completed Tests</title>
+
+    <!-- WinJS references -->
+    <link href="//Microsoft.WinJS.1.0.RC/css/ui-light.css" rel="stylesheet" />
+    <script src="//Microsoft.WinJS.1.0.RC/js/base.js"></script>
+    <script src="//Microsoft.WinJS.1.0.RC/js/ui.js"></script>
+
+    <!-- YUIMetroTester references -->
+    <script src="/js/yui3/build/yui/yui.js"></script>
+    <link href="/css/default.css" rel="stylesheet" />
+    <script src="/js/default.js"></script>
+</head>
+    <body>
+
+        <h1>Tests Complete.</h1>
+        
+        <h2 id="num-failed-tests"></h2>
+        <div id="test-results">
+            
+        </div>
+
+        <a href="default.html"><button>Back to main test page.</button></a>
+        <script>
+
+            YUI().use('node', 'event', 'test', function (Y) {
+
+                var localStorage = Y.config.win.localStorage;
+                //Display Test Results
+
+                var displayTestResults = function () {
+
+                    var results = JSON.parse(localStorage['YUI.TestResults']),
+                        tap,
+                        totalFailed = 0,
+                        heading = Y.one("#num-failed-tests");
+
+                    Y.Array.each(results, function (item, index, array) {
+                        totalFailed += item.failed;
+                        YUI.YUITest.TestRunner._lastResults = item;
+                        tap += YUI.YUITest.TestRunner.getResults(YUI.YUITest.TestFormat.TAP);
+                    });
+
+                    Y.one('h1').setContent(localStorage['YUI.CurrentComponent'] + ' tests completed.');
+                    console.log(JSON.stringify(YUI.YUITest.TestRunner._lastResults));
+                    tap.replace("\n", "<br/>");
+                    console.log(tap);
+                    Y.one("#test-results").set('innerText', tap);
+                    
+                    if (totalFailed === 0) {
+                        heading.setHTML("All tests passed!").addClass("passed");
+                    }
+                    else if (totalFailed === 1) {
+                        heading.setHTML("There was " + totalFailed + " failing test.").addClass("failed");
+                    }
+
+                    else if (totalFailed > 1) {
+                        heading.setHTML("There were " + totalFailed + " failing tests.").addClass("failed");
+                    }
+                }
+
+                var saveTestResults = function () {
+                    var pckg = Windows.ApplicationModel.Package.current;
+                    var installedLocation = pckg.installedLocation;
+                    var results = JSON.parse(localStorage['YUI.TestResults']);
+                    var str = '[';
+                    for (var j = 0; j < results.length; j++) {
+                        str += JSON.stringify(results[j]);
+
+                        if (results[j + 1]) {
+                            str += ',';
+                        }
+                    }
+                    str += ']';
+
+                    installedLocation.getFolderAsync('js').done(function (folder) {
+
+                        var currentComponent = window.localStorage['YUI.CurrentComponent'];
+                        WinJS.Application.local.writeText('results-' + currentComponent + '.txt', str).done(function () {
+                            console.log("Results written to results-" + currentComponent + ".txt");
+                        });
+
+                        clearLocalStorage();
+
+                    });
+                }
+
+                var clearLocalStorage = function () {
+                    localStorage.removeItem("YUI.Tests");
+                    localStorage.removeItem("YUI.TestResults");
+                    localStorage.removeItem("YUI.TestsHash");
+                    localStorage.removeItem("YUI.CurrentComponent");
+                }
+
+
+                
+                displayTestResults();
+                saveTestResults();
+            });
+
+
+        </script>
+    </body>
+</html>

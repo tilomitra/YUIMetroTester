@@ -3817,7 +3817,7 @@ if (!YUI.YUITest) {
                 }
 
                 else {
-                    document.location.href = '../../../../../../../default.html';
+                    document.location.href = '../../../../../../../complete.html';
                 }
 
             });

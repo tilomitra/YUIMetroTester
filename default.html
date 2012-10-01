@@ -73,7 +73,7 @@
 
                                     });
 
-                                    var b = Y.Node.create('<button class="test-module-button" data-module="' + f.displayName + '" data-firstTest="' + firstTestHtml + '"> Run ' + f.displayName + ' Tests</button>');
+                                    var b = Y.Node.create('<button class="test-module-button" data-module="' + f.displayName + '" data-firstTest="' + firstTestHtml + '">' + f.displayName + ': Run Tests</button>');
 
                                     menu.appendChild(b);
                                     menu.appendChild('<br/>');
@@ -99,40 +99,9 @@
                     Y.one('#wrapper').appendChild(menu);
                     window.setTimeout(function () {
 
-                        
-                        if (Y.config.win.localStorage['YUI.TestResults'] && JSON.parse(Y.config.win.localStorage['YUI.TestResults']) && JSON.parse(Y.config.win.localStorage['YUI.TestResults']).length > 0) {
-                            var results = JSON.parse(Y.config.win.localStorage['YUI.TestResults']);
-                            var str = '[';
-                            for (var j = 0; j < results.length; j++) {
-                                str += JSON.stringify(results[j]);
-
-                                if (results[j + 1]) {
-                                    str += ',';
-                                }
-                            }
-                            str += ']';
-
-                            installedLocation.getFolderAsync('js').done(function (folder) {
-
-                                var currentComponent = window.localStorage['YUI.CurrentComponent'];
-                                WinJS.Application.local.writeText('results-' + currentComponent + '.txt', str).done(function () {
-                                    console.log("Results written to results-" + currentComponent + ".txt");
-                                });
-
-                                Y.config.win.localStorage.removeItem("YUI.Tests");
-                                Y.config.win.localStorage.removeItem("YUI.TestResults");
-                                Y.config.win.localStorage.removeItem("YUI.TestsHash");
-                                Y.config.win.localStorage.removeItem("YUI.CurrentComponent");
-                           
-                            });
-                        }
-
-                        else {
-                            Y.config.win.localStorage.setItem("YUI.Tests", JSON.stringify(testsArray));
-                            Y.config.win.localStorage.setItem("YUI.TestResults", JSON.stringify([]));
-                            Y.config.win.localStorage.setItem("YUI.TestsHash", JSON.stringify(testsObj));
-                            
-                        }
+                        Y.config.win.localStorage.setItem("YUI.Tests", JSON.stringify(testsArray));
+                        Y.config.win.localStorage.setItem("YUI.TestResults", JSON.stringify([]));
+                        Y.config.win.localStorage.setItem("YUI.TestsHash", JSON.stringify(testsObj));
 
                         Y.fire("menuAdded");
                     }, 5000);

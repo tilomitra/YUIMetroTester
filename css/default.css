@@ -8,7 +8,7 @@ h1 {
 #wrapper {
     margin:50px 50px 0 0;
     overflow-y: scroll;
-    height:600px;
+    height:90%;
     text-align:center;
 }
 
@@ -17,10 +17,29 @@ h1 {
     color:white;
     font-size:30px;
 }
+#menu {
+    margin-top: 40px;
+    margin-bottom:40px;
+}
 
+#test-results {
+    overflow: scroll;
+    margin:40px auto;
+    height: 70%;
+    width: 90%;
+}
 #menu button {
     margin-bottom: 10px;
     width: 300px;
+}
+
+.failed {
+    color: red;
+    font-weight:bold;
+}
+
+.passed {
+    color: green;
 }
 @media screen and (-ms-view-state: fullscreen-landscape) {
 }
