@@ -57,6 +57,8 @@
     <Content Include="images\storelogo.png" />
     <Content Include="js\default.js" />
     <Content Include="css\default.css" />
+    <Content Include="js\readableTestResults.js" />
+    <Content Include="js\results.txt" />
     <Content Include="js\yui3\build\align-plugin\align-plugin-coverage.js" />
     <Content Include="js\yui3\build\align-plugin\align-plugin-debug.js" />
     <Content Include="js\yui3\build\align-plugin\align-plugin-min.js" />

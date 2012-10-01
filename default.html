@@ -17,42 +17,21 @@
 <body class="yui3-skin-sam"> 
     <h1>YUI3 Unit Tests. Choose a test.</h1>
     <div id="wrapper">
+        <h2><button id="start-tests">Run all Unit Tests</button></h2>
         <div id="menu"></div>
     </div>
 
-
-    <div id="container">
-        <iframe id="test-iframe" src="#" width="800" height="600"></iframe>
-    </div>
     <script>
-
-        YUI().use('node', 'event', function (Y) {
+        YUI().use('node', 'event', 'test', function (Y) {
             var pckg = Windows.ApplicationModel.Package.current;
             var installedLocation = pckg.installedLocation;
             var menu = Y.one('#menu');
-            var isRunnerSetup = false;
-            //This function gets all the assets/ (js) files for the tests and appends those as script files to the DOM
-            var getUnitAssets = function (folder) {
-                var scriptNode = document.createElement('script');
-                folder.getFolderAsync('assets').done(function (assets) {
 
-                    assets.getFilesAsync().done(function (files) {
-                        files.forEach(function (e, i) {
-                            var url = e.path.substring(installedLocation.path.length);
+            
+            var relativePath = '../../../'; //relative path variable provides the relative path to src/ from a unit test html page.
+            var testsArray = []; //store an array of all unit test html files
+            var testsObj = {}; //store a hash of unit test html files where key=modulename, value=array of unit tests for module
 
-                            if (url.substr(-2) === 'js') {
-                                scriptNode.setAttribute("src", url);
-                                document.body.appendChild(scriptNode);
-                            }
-                        });
-                    });
-
-                },
-                            
-              function (error) {
-                console.log("No assets/ directory found inside :" + folder.path.substring(installedLocation.path.length));
-              });
-            }
 
             //this function gets all the unit tests html files and appends a link to them in the DOM
             var getUnitTestFiles = function (folder) {
@@ -63,42 +42,98 @@
 
                         //for each folder, get the html file(s) inside tests/unit
                         f.getFolderAsync('tests').done(function (tests) {
-
                             tests.getFolderAsync('unit').done(function (unit) {
-
-                                //getUnitAssets(unit);
+                                var firstTestHtml = '';
+                                testsObj[f.displayName] = [];
 
                                 unit.getFilesAsync().done(function (files) {
 
-
-                                    var title = Y.Node.create('<h2>' + f.displayName + '</h2>');
-                                    menu.appendChild(title);
-
                                     files.forEach(function (e, i) {
-                                        var a = Y.Node.create('<a href="' + e.path.substring(installedLocationPath.length) + '" class="test-link">' + e.displayName + '</a>');
-                                        menu.appendChild(a);
-                                        menu.appendChild('<br/>');
+                                        if (i === 0) {
+                                            firstTestHtml = e.displayName + e.fileType;
+                                        }
+
+                                        var path = relativePath + f.displayName + '/tests/unit/' + e.displayName + e.fileType;
+                                        if (f.displayName !== 'attribute'
+                                                && e.displayName !== 'gesture-simulate' //same problem as attribute
+                                                && e.displayName !== 'datatable-table' //same issue as attribute
+                                                && f.displayName !== 'uploader' //active-x error, but uploaderqueue has same issue as attribute
+                                                && e.displayName !== 'coverage' //not designed for unit tests
+                                            ) {
+
+                                            if (e.fileType === '.html') {
+
+                                                testsArray.push(path);
+                                                console.log(path);
+                                                testsObj[f.displayName].push(path);
+                                            }
+                                        }
+                                       
+                                        //var a = Y.Node.create('<a href="' + e.path.substring(installedLocationPath.length) + '" class="test-link">' + e.displayName + '</a>');
 
                                     });
+
+                                    var b = Y.Node.create('<button class="test-module-button" data-module="' + f.displayName + '" data-firstTest="' + firstTestHtml + '"> Run ' + f.displayName + ' Tests</button>');
+
+                                    menu.appendChild(b);
+                                    menu.appendChild('<br/>');
+
                                 });
 
                                 
                             },
 
                             function (error) {
-                                console.log("Tests Folder with path: " + tests.path.substring(installedLocationPath.length) + " has no unit/ directory");
+                                //console.log("Tests Folder with path: " + tests.path.substring(installedLocationPath.length) + " has no unit/ directory");
                             });
 
                         },
 
                         function (error) {
-                            console.log("Folder with name: " + folder.path.substring(installedLocationPath.length) + " has no tests/ directory");
+                            //console.log("Folder with name: " + folder.path.substring(installedLocationPath.length) + " has no tests/ directory");
                         });
 
                     });
 
+
                     Y.one('#wrapper').appendChild(menu);
                     window.setTimeout(function () {
+
+                        
+                        if (Y.config.win.localStorage['YUI.TestResults'] && JSON.parse(Y.config.win.localStorage['YUI.TestResults']) && JSON.parse(Y.config.win.localStorage['YUI.TestResults']).length > 0) {
+                            var results = JSON.parse(Y.config.win.localStorage['YUI.TestResults']);
+                            var str = '[';
+                            for (var j = 0; j < results.length; j++) {
+                                str += JSON.stringify(results[j]);
+
+                                if (results[j + 1]) {
+                                    str += ',';
+                                }
+                            }
+                            str += ']';
+
+                            installedLocation.getFolderAsync('js').done(function (folder) {
+
+                                var currentComponent = window.localStorage['YUI.CurrentComponent'];
+                                WinJS.Application.local.writeText('results-' + currentComponent + '.txt', str).done(function () {
+                                    console.log("Results written to results-" + currentComponent + ".txt");
+                                });
+
+                                Y.config.win.localStorage.removeItem("YUI.Tests");
+                                Y.config.win.localStorage.removeItem("YUI.TestResults");
+                                Y.config.win.localStorage.removeItem("YUI.TestsHash");
+                                Y.config.win.localStorage.removeItem("YUI.CurrentComponent");
+                           
+                            });
+                        }
+
+                        else {
+                            Y.config.win.localStorage.setItem("YUI.Tests", JSON.stringify(testsArray));
+                            Y.config.win.localStorage.setItem("YUI.TestResults", JSON.stringify([]));
+                            Y.config.win.localStorage.setItem("YUI.TestsHash", JSON.stringify(testsObj));
+                            
+                        }
+
                         Y.fire("menuAdded");
                     }, 5000);
 
@@ -106,42 +141,6 @@
 
             }
 
-
-            var setUpRunner = function (runner) {
-
-                runner.subscribe(runner.TEST_SUITE_BEGIN_EVENT, function (o) {
-                    console.log("Test Case beginning");
-                    if (completedTestCases[o.testName]) {
-                        console.log("The test with name: " + o.testName + "has already been tested");
-                    }
-
-
-                });
-
-                runner.subscribe(runner.TEST_SUITE_COMPLETE_EVENT, function (o) {
-
-
-
-                    console.log("Finished running Test Case with name: " + o.results.name);
-                    console.log("Total Tests: " + o.results.total);
-                    console.log("Failed Tests: " + o.results.failed);
-                    console.log("Passed Tests: " + o.results.passed);
-                    console.log("Ignored Tests: " + o.results.ignored);
-
-                    currentScenario++;
-                    if (scenarios[currentScenario]) {
-
-                        WinJS.Navigation.navigate(scenarios[currentScenario].url);
-
-                    }
-                    else {
-                        console.log("Finished Running all Scenarios");
-                    }
-                });
-
-                isRunnerSetup = true;
-
-            }
 
             //Get all unit tests files by traversing the src/ directory. This code is written in this crappy way because
             // i couldn't write getFolderAsync(js/yui3/src) for some reason, so I had to traverse one step at a time.
@@ -156,28 +155,26 @@
                         getUnitTestFiles(folder);
                     });
                 });
-
+        
             });
-
+        
             //When all the tests are appended to the dom, set up an event listener
             Y.on('menuAdded', function () {
+                Y.one('#start-tests').on('click', function (e) {
+                    Y.config.win.localStorage.setItem("YUI.CurrentComponent", "all");
+                    document.location.href = "/js/yui3/src/arraysort/tests/unit/arraysort.html";
+                });
+
                 Y.one('#menu').delegate('click', function (e) {
-
-                    //get the global test runner
-                    var intId = window.setInterval(function () {
-                        if (YUI.YUITest || isRunnerSetup) {
-                            window.clearInterval(intId);
-
-                            if (!isRunnerSetup) {
-                                setUpRunner(YUI.YUITest.TestRunner);
-                            }
-                        }
-                    }, 500);
-                    e.preventDefault();
-                    //WinJS.Navigation.navigate(e.target.get('href'));
-                    Y.one("#test-iframe").setAttribute('src', this.get('href'));
-                }, 'a.test-link');
+                    var module = this.getAttribute('data-module');
+                    testsArray = testsObj[module];
+                    Y.config.win.localStorage.setItem("YUI.CurrentComponent", module);
+                    Y.config.win.localStorage.setItem("YUI.Tests", JSON.stringify(testsArray));
+                    document.location.href = '/js/yui3/src/' + module + '/tests/unit/' + this.getAttribute('data-firstTest');
+                }, 'button');
             });
+
+
 
         
         });
