@@ -13,7 +13,7 @@ That's normal. Here's what you have to do:
 * Clone the repo.
 * Navigate in to the js/ folder.
 * Clone yui3/ from the YUI3 repo and switch to the `ie10` branch. The `ie10` branch contains important fixes to make YUI work in IE10. 
-* Try building.
+* Try building from within Visual Studio.
 
 
 Help! I'm still having issues
@@ -27,7 +27,7 @@ You should now see the yui3/ directory inside the js/ folder. Folders that are i
 * To include it in your project, expand the folder inside the Solution Explorer and right-click on the build/ directory. 
 * Click "Include in Project". This will take a minute or two.
 * Next, do the same with the src/ directory. 
-* Try re-building. Restart Visual Studio to be safe, because sometimes it doesn't refresh the project directory immediately.
+* Try re-building within Visual Studio. Restart Visual Studio to be safe, because sometimes it doesn't refresh the project directory immediately.
 
 
-Still not working? Send me an email (tilomitra@gmail.com) or add an issue to this repo.
+Still not working? Let me know on Twitter (@tilomitra) or add an issue to this project. 
