@@ -41,7 +41,7 @@
 <body>
 
     <h2>WinJS: Modules with Failing Tests</h2>
-    <h4>As of 10/3/2012 (last commit <code>1fd4b6</code>). Click on a module to view all failing tests.</h4>
+    <h4>As of 10/4/2012. Click on a module to view all failing tests.</h4>
 
     <h3 id="total-failed"></h3>
     <div id="failed-modules"></div>
@@ -77,76 +77,76 @@
                 totalPassed = 0;
 
             YUI.YUITest.TestFormat.CustomTAP = function(results) {
-        
+
                 var currentTestNum = 1;
 
                 function serializeToTAP(results){
                     var text = "";
-                        
+
                     switch (results.type){
 
                         case "test":
                             if (results.result != "ignore"){
 
                                 text = "ok " + (currentTestNum++) + " - " + results.name;
-                                
+
                                 if (results.result == "fail"){
                                     text = "not " + text + " - " + results.message;
                                 }
-                                
+
                                 text += "\n";
                             } else {
                                 //text = "#Ignored test " + results.name + "\n";
                             }
                             break;
-                            
+
                         case "testcase":
-                        
+
                             //text = "#Begin testcase " + results.name + "(" + results.failed + " failed of " + results.total + ")\n";
-                                            
+
                             for (var prop in results){
                                 if (results.hasOwnProperty(prop)){
                                     if (results[prop] && typeof results[prop] == "object" && !(results[prop] instanceof Array)){
                                         text += serializeToTAP(results[prop]);
                                     }
                                 }
-                            }            
-                            
+                            }
+
                             //text += "#End testcase " + results.name + "\n";
-                            
-                            
+
+
                             break;
-                        
+
                         case "testsuite":
 
-                            //text = "#Begin testsuite " + results.name + "(" + results.failed + " failed of " + results.total + ")\n";                
-                        
+                            //text = "#Begin testsuite " + results.name + "(" + results.failed + " failed of " + results.total + ")\n";
+
                             for (var prop in results){
                                 if (results.hasOwnProperty(prop)){
                                     if (results[prop] && typeof results[prop] == "object" && !(results[prop] instanceof Array)){
                                         text += serializeToTAP(results[prop]);
                                     }
                                 }
-                            }                                                      
+                            }
 
                             //text += "#End testsuite " + results.name + "\n";
                             break;
 
                         case "report":
-                        
+
                             for (var prop in results){
                                 if (results.hasOwnProperty(prop)){
                                     if (results[prop] && typeof results[prop] == "object" && !(results[prop] instanceof Array)){
                                         text += serializeToTAP(results[prop]);
                                     }
                                 }
-                            }              
-                            
+                            }
+
                         //no default
                     }
-                    
+
                     return text;
-             
+
                 }
                 return "1.." + results.total + "\n" + serializeToTAP(results);
             }
@@ -154,54 +154,54 @@
             Y.Array.each(RESULTS, function(val,key,obj){
 
                 totalFailed += val.failed;
-                 
+
                Y.Object.each(val, function(v,k,o){
-                  
+
                    if(Y.Lang.isObject(v)){
                     //sub object could be suite or case
                         Y.log("type:" + v.type);
-                      
+
                        if(v.type === "testcase"){
-                       
+
                        killTestCases(v);
                        } else {
-                       
+
                            if(v.type === "testsuite"){
                                Y.Object.each(v, function(vv,kk,oo){
                                    if(Y.Lang.isObject(vv)){
-                                   
+
                                        if(vv.type === "testcase"){
-                       
+
                                            killTestCases(vv);
                                           }
-                                   
+
                                    }
-                                             
-                                             
+
+
                                });
-                           
+
                            }
                        }
                    }
-               
+
                }); //end Y.Object
 
-                       
-            }); //end Y.Array    
 
-                       
+            }); //end Y.Array
+
+
            function killTestCases(obj){
                Y.Object.each(obj, function(v,k,o){
-                   
+
                    if(Y.Lang.isObject(v)){
                        if(v.result && v.result ==="pass"){
                             delete(o[k]);
                        }
                    }
-               
-               })               
+
+               })
            };
-              
+
 
             var failedNode = Y.one("#failed-modules"),
                 i = 0
@@ -211,16 +211,16 @@
 
 
                 if (RESULTS[i].failed > 0) {
-                    
+
                     YUI.YUITest.TestRunner._lastResults = RESULTS[i];
                     tap = YUI.YUITest.TestRunner.getResults(YUI.YUITest.TestFormat.CustomTAP);
-                    failedNode.appendChild('<div class="failed-module"><h3>' + RESULTS[i].name + '</h3><pre>' + tap  + '</pre></div>');                        
+                    failedNode.appendChild('<div class="failed-module"><h3>' + RESULTS[i].name + '</h3><pre>' + tap  + '</pre></div>');
                 }
             }
 
             Y.one("#total-failed").setHTML("There are " + totalFailed + " failing tests.");
 
-            Y.one(failedNode).delegate('click', function(e) {                
+            Y.one(failedNode).delegate('click', function(e) {
                 this.get('parentNode').toggleClass('active');
             }, 'h3');
 
