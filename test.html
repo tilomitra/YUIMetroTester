@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+
+
+    <style>
+
+    body {
+        font-family: sans-serif;
+        color: #121;
+        padding:25px 50px;
+    }
+    #failed-modules pre {
+        display:none;
+    }
+
+    #failed-modules .active pre {
+        display:block;
+        border-left: 3px solid #ddd;
+        padding-left:15px;
+    }
+
+    h3 {
+        font-weight:normal;
+        padding-bottom:5px;
+        border-bottom: 1px solid #ddd;
+        margin-bottom:6px;
+        cursor:pointer;
+    }
+    pre {
+        width:100%;
+        overflow-x: scroll;
+    }
+
+    #total-failed {
+        text-transform: capitalize;
+        color: red;
+        font-weight:bold;
+        font-size:16px;
+        margin-bottom:15px;
+    }
+    </style>
+</head>
+<body>
+
+    <h2>WinJS: Modules with Failing Tests</h2>
+    <h4>As of 9/28/2012 (last commit <code>b441b6ccd</code>). Click on a module to view all test results.</h4>
+
+    <h3 id="total-failed"></h3>
+    <div id="failed-modules"></div>
+    <div id="failed-tests"></div>
+
+
+    <script id="modules-list-template" type="script/x-handlebars">
+        <div class="failed-module">
+            <h3>{{name}}</h3>
+            <pre>{{results}}</pre>
+        </div>
+    </script>
+
+    <script id="failed-tests-list-template" type="script/x-handlebars">
+        <div class="failed-test">
+            <h3>{{suiteName}}</h3>
+            {{#tests}}
+                <h5>Failed test in testcase: {{testCase}}</h5>
+                <pre>{{{test}}}</pre>
+            {{/tests}}
+        </div>
+    </script>
+
+
+    <script src="http://yui.yahooapis.com/3.7.2/build/yui/yui-min.js"></script>
+    <script src="results.js"></script>
+
+    <script>
+
+        YUI().use('handlebars', 'node', 'get', 'test', function (Y) {
+
+
+            YUI.YUITest.TestFormat.CustomTAP = function(results) {
+        
+                var currentTestNum = 1;
+
+                function serializeToTAP(results){
+                    var text = "";
+                        
+                    switch (results.type){
+
+                        case "test":
+                            if (results.result != "ignore"){
+
+                                text = "ok " + (currentTestNum++) + " - " + results.name;
+                                
+                                if (results.result == "fail"){
+                                    text = "not " + text + " - " + results.message;
+                                }
+                                
+                                text += "\n";
+                            } else {
+                                //text = "#Ignored test " + results.name + "\n";
+                            }
+                            break;
+                            
+                        case "testcase":
+                        
+                            //text = "#Begin testcase " + results.name + "(" + results.failed + " failed of " + results.total + ")\n";
+                                            
+                            for (var prop in results){
+                                if (results.hasOwnProperty(prop)){
+                                    if (results[prop] && typeof results[prop] == "object" && !(results[prop] instanceof Array)){
+                                        text += serializeToTAP(results[prop]);
+                                    }
+                                }
+                            }            
+                            
+                            //text += "#End testcase " + results.name + "\n";
+                            
+                            
+                            break;
+                        
+                        case "testsuite":
+
+                            //text = "#Begin testsuite " + results.name + "(" + results.failed + " failed of " + results.total + ")\n";                
+                        
+                            for (var prop in results){
+                                if (results.hasOwnProperty(prop)){
+                                    if (results[prop] && typeof results[prop] == "object" && !(results[prop] instanceof Array)){
+                                        text += serializeToTAP(results[prop]);
+                                    }
+                                }
+                            }                                                      
+
+                            //text += "#End testsuite " + results.name + "\n";
+                            break;
+
+                        case "report":
+                        
+                            for (var prop in results){
+                                if (results.hasOwnProperty(prop)){
+                                    if (results[prop] && typeof results[prop] == "object" && !(results[prop] instanceof Array)){
+                                        text += serializeToTAP(results[prop]);
+                                    }
+                                }
+                            }              
+                            
+                        //no default
+                    }
+                    
+                    return text;
+             
+                }
+                return "1.." + results.total + "\n" + serializeToTAP(results);
+            }
+
+            Y.Array.each(RESULTS, function(val,key,obj){
+               Y.Object.each(val, function(v,k,o){
+                  
+                   if(Y.Lang.isObject(v)){
+                    //sub object could be suite or case
+                        Y.log("type:" + v.type);
+                      
+                       if(v.type === "testcase"){
+                       
+                       killTestCases(v);
+                       } else {
+                       
+                           if(v.type === "testsuite"){
+                               Y.Object.each(v, function(vv,kk,oo){
+                                   if(Y.Lang.isObject(vv)){
+                                   
+                                       if(vv.type === "testcase"){
+                       
+                                           killTestCases(vv);
+                                          }
+                                   
+                                   }
+                                             
+                                             
+                               });
+                           
+                           }
+                       }
+                   }
+               
+               }); //end Y.Object
+
+                       
+            }); //end Y.Array    
+
+                       
+           function killTestCases(obj){
+               Y.Object.each(obj, function(v,k,o){
+                   
+                   if(Y.Lang.isObject(v)){
+                       Y.log("type:" + v.type);
+                       if(v.result && v.result ==="pass"){
+                       delete(o[k]);
+                       }
+                   }
+               
+               })               
+           };
+              
+
+            var failedNode = Y.one("#failed-modules"),
+                i = 0
+
+            for (; i < RESULTS.length; i++) {
+                YUI.YUITest.TestRunner._lastResults = RESULTS[i];
+
+
+                if (RESULTS[i].failed > 0) {
+                    YUI.YUITest.TestRunner._lastResults = RESULTS[i];
+                    tap = YUI.YUITest.TestRunner.getResults(YUI.YUITest.TestFormat.CustomTAP);
+                    failedNode.appendChild('<div class="failed-module"><h3>' + RESULTS[i].name + '</h3><pre>' + tap  + '</pre></div>');                        
+                }
+            }
+
+            Y.one(failedNode).delegate('click', function(e) {                
+                this.get('parentNode').toggleClass('active');
+            }, 'h3');
+
+        });
+    </script>
+</body>
+</html>
