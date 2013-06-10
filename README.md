@@ -12,8 +12,8 @@ That's normal. Here's what you have to do:
 
 * Clone the repo.
 * Navigate in to the js/ folder.
-* Clone yui3/ from the YUI3 repo and switch to the `ie10` branch. The `ie10` branch contains important fixes to make YUI work in IE10. 
-* Try building from within Visual Studio.
+* Delete any `yui3/` directory. Clone yui3/ from the [YUI3 repo](http://github.com/yui/yui3/). That will create a new yui3/ directory. 
+* Build from Visual Studio. The app should launch and show a list of all modules within YUI. You can click on a module to run its unit tests.
 
 
 Help! I'm still having issues
