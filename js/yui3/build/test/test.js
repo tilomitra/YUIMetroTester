@@ -1021,7 +1021,7 @@ YUITest.TestFormat = function(){
             
             /**
             * If true, YUITest will not fire an error for tests with no Asserts.
-            * @prop _ignoreEmpty
+            * @property _ignoreEmpty
             * @private
             * @type Boolean
             * @static
@@ -3759,79 +3759,6 @@ if (!YUI.YUITest) {
             Y.Test.Runner.subscribe(name, logEvent);
         }
     };
-
-    var handleError = function (error) {
-        return true;
-    }
-    Y.Get.js('//Microsoft.WinJS.1.0.RC/js/base.js', function (err) {
-
-        if (err) {
-            console.log("Error loading WinJS RC");
-        }
-        else {
-            WinJS.Application.onerror = handleError;
-
-
-            YUI.YUITest.TestRunner.subscribe(YUI.YUITest.TestRunner.BEGIN_EVENT, function (o) {
-                console.log("Beginning tests...");
-                Y.applyConfig({ throwFail: false });
-            });
-            YUI.YUITest.TestRunner.subscribe(YUI.YUITest.TestRunner.COMPLETE_EVENT, function (o) {
-                console.log("Tests completed...");
-
-                //save test runner results
-                var r = JSON.parse(Y.config.win.localStorage.getItem("YUI.TestResults"));
-                if (r) {
-                    r.push(o.results);
-                }
-
-                console.log(JSON.stringify(o.results));
-                Y.config.win.localStorage.setItem("YUI.TestResults", JSON.stringify(r));
-
-                //read tests array and pop the first one off the list
-                var a = JSON.parse(Y.config.win.localStorage.getItem("YUI.Tests"));
-                if (a) {
-                    a.pop();
-                }
-
-                //save updated tests array
-                Y.config.win.localStorage.setItem("YUI.Tests", JSON.stringify(a));
-
-                //Windows.ApplicationModel.Package.current.installedLocation.getFolderAsync('js').done(function (folder) {
-                //    var fname = 'tester-' + o.testSuite.name.replace(" ", "-") + '.txt';
-                //    WinJS.Application.local.writeText(fname, JSON.stringify(r)).done(function () {
-                //        console.log("Results written to " + fname);
-                //    });
-
-                //});
-
-
-
-                //navigate to url
-                console.log(a.length + ' remaining test suites...');
-
-                if (a.length > 0) {
-                    console.log('Next test file: ' + a[a.length - 2]);
-                    console.log("Navigating to a new test: " + a[a.length - 1]);
-                    document.location.href = a[a.length - 1];
-                }
-
-                else {
-                    document.location.href = '../../../../../../../complete.html';
-                }
-
-            });
-
-
-
-
-
-
-
-        }
-    });
-
-    window.onerror = handleError;
 
 } //End if for YUI.YUITest
 

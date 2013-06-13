@@ -1,0 +1,26 @@
+<form id="demo">
+    <fieldset>
+        <label for="demo_input">String to parse:</label>
+        <input type="text" id="demo_input" value="Jan 7, 2003">
+        <input type="button" id="demo_btn" value="Parse date">
+        <div id="demo_output" class="output">&nbsp;</div>
+    </fieldset>
+</form>
+
+
+
+<script>
+YUI().use("node", "datatype-date", function (Y) {
+    Y.on("click", function(e){
+        
+        var input = Y.one("#demo_input").get("value"),
+            output = Y.Date.parse(input);
+                
+        if(output === null) {
+            output = "null"
+        }
+        
+        Y.one("#demo_output").setHTML(output.toString());
+    }, "#demo_btn");
+});
+</script>
