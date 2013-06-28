@@ -5,9 +5,9 @@
     <title>YUIMetroTester</title>
 
     <!-- WinJS references -->
-    <link href="//Microsoft.WinJS.1.0.RC/css/ui-light.css" rel="stylesheet" />
-    <script src="//Microsoft.WinJS.1.0.RC/js/base.js"></script>
-    <script src="//Microsoft.WinJS.1.0.RC/js/ui.js"></script>
+    <link href="//Microsoft.WinJS.1.0/css/ui-light.css" rel="stylesheet" />
+    <script src="//Microsoft.WinJS.1.0/js/base.js"></script>
+    <script src="//Microsoft.WinJS.1.0/js/ui.js"></script>
 
     <!-- YUIMetroTester references -->
     <script src="/js/yui3/build/yui/yui.js"></script>
@@ -59,14 +59,22 @@
                                                 && e.displayName !== 'datatable-table' //same issue as attribute
                                                 && f.displayName !== 'uploader' //active-x error, but uploaderqueue has same issue as attribute
                                                 && e.displayName !== 'coverage' //not designed for unit tests
+                                                && e.displayName !== 'editor'
+                                                && e.displayName !== 'frame'
+                                                && f.displayName !== 'io'
+                                                && f.displayName !== 'event-gestures'
+                                                && f.displayName !== 'jsonp'
+                                                && f.displayName !== 'get'
                                             ) {
 
+                                            
                                             if (e.fileType === '.html') {
 
                                                 testsArray.push(path);
                                                 console.log(path);
                                                 testsObj[f.displayName].push(path);
                                             }
+                                            
                                         }
                                        
                                         //var a = Y.Node.create('<a href="' + e.path.substring(installedLocationPath.length) + '" class="test-link">' + e.displayName + '</a>');
@@ -131,7 +139,7 @@
             Y.on('menuAdded', function () {
                 Y.one('#start-tests').on('click', function (e) {
                     Y.config.win.localStorage.setItem("YUI.CurrentComponent", "all");
-                    document.location.href = "/js/yui3/src/arraysort/tests/unit/arraysort.html";
+                    document.location.href = "./tests.html";
                 });
 
                 Y.one('#menu').delegate('click', function (e) {

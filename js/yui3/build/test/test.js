@@ -1021,7 +1021,7 @@ YUITest.TestFormat = function(){
             
             /**
             * If true, YUITest will not fire an error for tests with no Asserts.
-            * @prop _ignoreEmpty
+            * @property _ignoreEmpty
             * @private
             * @type Boolean
             * @static
@@ -3763,7 +3763,8 @@ if (!YUI.YUITest) {
     var handleError = function (error) {
         return true;
     }
-    Y.Get.js('//Microsoft.WinJS.1.0.RC/js/base.js', function (err) {
+
+    Y.Get.js('//Microsoft.WinJS.1.0/js/base.js', function (err) {
 
         if (err) {
             console.log("Error loading WinJS RC");
@@ -3813,9 +3814,8 @@ if (!YUI.YUITest) {
                 if (a.length > 0) {
                     console.log('Next test file: ' + a[a.length - 2]);
                     console.log("Navigating to a new test: " + a[a.length - 1]);
-                    document.location.href = a[a.length - 1];
+                    document.location.href = a[a.length - 1];                    
                 }
-
                 else {
                     document.location.href = '../../../../../../../complete.html';
                 }
