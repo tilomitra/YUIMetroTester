@@ -42,11 +42,8 @@
 
             currentScenario++;
             if (scenarios[currentScenario]) {
-
                 WinJS.Navigation.navigate(scenarios[currentScenario].url);
-
-            }
-            else {
+            } else {
                 console.log("Finished Running all Scenarios");
             }
         });

@@ -23,10 +23,10 @@ h1 {
 }
 
 #test-results {
-    overflow: scroll;
+    overflow-y: scroll;
     margin:40px auto;
-    height: 70%;
-    width: 90%;
+    height: 500px; 
+    width: 700px;
 }
 #menu button {
     margin-bottom: 10px;
@@ -42,6 +42,12 @@ h1 {
     color: green;
     font-weight:bold;
 }
+
+iframe {
+    width: 700px;
+    height: 700px;
+}
+
 @media screen and (-ms-view-state: fullscreen-landscape) {
 }
 

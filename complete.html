@@ -5,9 +5,9 @@
     <title>YUIMetroTester: Completed Tests</title>
 
     <!-- WinJS references -->
-    <link href="//Microsoft.WinJS.1.0.RC/css/ui-light.css" rel="stylesheet" />
-    <script src="//Microsoft.WinJS.1.0.RC/js/base.js"></script>
-    <script src="//Microsoft.WinJS.1.0.RC/js/ui.js"></script>
+    <link href="//Microsoft.WinJS.1.0/css/ui-light.css" rel="stylesheet" />
+    <script src="//Microsoft.WinJS.1.0/js/base.js"></script>
+    <script src="//Microsoft.WinJS.1.0/js/ui.js"></script>
 
     <!-- YUIMetroTester references -->
     <script src="/js/yui3/build/yui/yui.js"></script>
@@ -23,7 +23,14 @@
             
         </div>
 
-        <a href="default.html"><button>Back to main test page.</button></a>
+        <button class="backToFront">Back to main test page.</button>
+        <script>
+            YUI().use('node', function (Y) {
+                Y.one('.backToFront').on('click', function () {
+                    document.location.href = 'default.html';
+                });
+            });
+        </script>
         <script>
 
             YUI().use('node', 'event', 'test', function (Y) {
